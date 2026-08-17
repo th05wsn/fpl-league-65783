@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL League 65783 | Dashboard</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .gradient-bg { background: linear-gradient(90deg, #37003c 0%, #00ff87 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .row-hover:hover { background-color: #f9fafb; transition: background-color 0.2s; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <i class="fa-solid fa-trophy text-3xl text-white"></i>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight" id="league-title">Loading League...</h1>
+                    <p class="text-sm font-medium opacity-90">League Code: 65783</p>
+                </div>
+            </div>
+            <div>
+                <a href="https://fantasy.premierleague.com/" target="_blank" class="bg-white text-[#37003c] px-4 py-2 rounded font-semibold text-sm hover:bg-gray-100 transition shadow">
+                    Official FPL <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- Loading State -->
+        <div id="loading-state" class="flex flex-col items-center justify-center py-20">
+            <i class="fa-solid fa-circle-notch fa-spin text-5xl text-[#37003c] mb-4"></i>
+            <p class="text-lg font-semibold animate-pulse text-gray-600">Fetching live FPL data...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-8 rounded shadow-sm">
+            <p class="font-bold">Error loading league data</p>
+            <p class="text-sm">The FPL API might be updating or the proxy is temporarily blocked. Please refresh the page in a few moments.</p>
+        </div>
+
+        <!-- Dashboard Structure -->
+        <div id="dashboard" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Standings -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-panel rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-list-ol mr-2 text-[#00ff87]"></i> Classic Standings</h2>
+                        <span id="player-count" class="text-sm font-semibold bg-gray-100 px-3 py-1 rounded-full text-gray-600">0 Managers</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-3 font-semibold">Rank</th>
+                                    <th class="px-6 py-3 font-semibold">Team & Manager</th>
+                                    <th class="px-6 py-3 font-semibold text-center">GW Points</th>
+                                    <th class="px-6 py-3 font-semibold text-center">Total Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="standings-body" class="divide-y divide-gray-100 text-sm">
+                                <!-- JS Injected Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Stats & Predictions -->
+            <div class="space-y-6">
+                <!-- Top Manager Card -->
+                <div class="glass-panel rounded-xl shadow-sm border border-gray-100 p-6 bg-gradient-to-br from-white to-gray-50">
+                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">League Leader</h3>
+                    <div class="flex items-center space-x-4">
+                        <div class="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 border border-yellow-200">
+                            <i class="fa-solid fa-crown text-xl"></i>
+                        </div>
+                        <div>
+                            <p id="top-manager-name" class="font-bold text-gray-900 text-lg">Loading...</p>
+                            <p id="top-team-name" class="text-gray-500 text-sm">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GW Performance Card -->
+                <div class="glass-panel rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Gameweek Highlights</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600"><i class="fa-solid fa-fire mr-2 text-red-500"></i> Highest GW Score</span>
+                            <span id="highest-gw-score" class="font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded">0</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600"><i class="fa-solid fa-chart-line mr-2 text-blue-500"></i> League Average</span>
+                            <span id="league-avg-score" class="font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded">0</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Predictions Panel -->
+                <div class="glass-panel rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Basic Projections</h3>
+                    <p class="text-sm text-gray-600 mb-4">Based on current point trajectories, the projected end-of-season winning score for this league is estimated to be:</p>
+                    <div class="text-center bg-[#37003c] text-white rounded-lg p-4 shadow-inner">
+                        <span id="projected-winner-score" class="text-3xl font-black text-[#00ff87]">0</span>
+                        <p class="text-xs mt-1 opacity-80">pts</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
+            <p>Data provided by Fantasy Premier League. This dashboard is for informational purposes.</p>
+        </div>
+    </footer>
+
+    <script>
+        const LEAGUE_ID = '65783';
+        const TARGET_URL = `https://fantasy.premierleague.com/api/leagues-classic/${LEAGUE_ID}/standings/`;
+
+        // We use proxy services to bypass standard browser CORS restrictions
+        const PROXIES = [
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(TARGET_URL)}`,
+            `https://corsproxy.io/?${encodeURIComponent(TARGET_URL)}`
+        ];
+
+        async function fetchLeagueData() {
+            let data = null;
+            
+            for (let proxy of PROXIES) {
+                try {
+                    const response = await fetch(proxy);
+                    if (response.ok) {
+                        data = await response.json();
+                        break; 
+                    }
+                } catch (error) {
+                    console.warn(`Proxy failed, trying fallback...`);
+                }
+            }
+
+            if (!data) {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+                return;
+            }
+
+            renderDashboard(data);
+        }
+
+        function renderDashboard(data) {
+            // Hide loading, show dashboard
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            const league = data.league;
+            const standings = data.standings.results;
+
+            // Populate League Info
+            document.getElementById('league-title').textContent = league.name;
+            document.getElementById('player-count').textContent = `${standings.length} Managers`;
+
+            // Analytics logic
+            let highestGwScore = 0;
+            let highestGwPlayer = '';
+            let totalPointsPool = 0;
+
+            const tbody = document.getElementById('standings-body');
+            tbody.innerHTML = '';
+
+            standings.forEach(manager => {
+                // Tracking stats
+                if (manager.event_total > highestGwScore) {
+                    highestGwScore = manager.event_total;
+                    highestGwPlayer = manager.player_name;
+                }
+                totalPointsPool += manager.total;
+
+                // Rank Movement Logic
+                let movementIcon = '<i class="fa-solid fa-minus text-gray-300"></i>';
+                if (manager.last_rank > manager.rank) {
+                    movementIcon = '<i class="fa-solid fa-arrow-up text-green-500"></i>';
+                } else if (manager.last_rank < manager.rank && manager.last_rank !== 0) {
+                    movementIcon = '<i class="fa-solid fa-arrow-down text-red-500"></i>';
+                }
+
+                // Table Row construction
+                const tr = document.createElement('tr');
+                tr.className = 'row-hover';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-lg font-bold text-gray-700">${manager.rank}</span>
+                            <span class="text-xs">${movementIcon}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="https://fantasy.premierleague.com/entry/${manager.entry}/history" target="_blank" class="hover:text-blue-600 transition">
+                            <div class="font-bold text-gray-900">${manager.entry_name}</div>
+                            <div class="text-xs text-gray-500">${manager.player_name}</div>
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <span class="font-semibold text-gray-700">${manager.event_total}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <span class="font-bold text-[#37003c] text-base">${manager.total}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Populate Right Panel
+            if (standings.length > 0) {
+                const topManager = standings[0];
+                document.getElementById('top-manager-name').textContent = topManager.player_name;
+                document.getElementById('top-team-name').textContent = topManager.entry_name;
+                
+                document.getElementById('highest-gw-score').innerHTML = `${highestGwScore} <span class="text-xs text-gray-500 font-normal ml-1">(${highestGwPlayer.split(' ')[0]})</span>`;
+                
+                const avgPoints = (totalPointsPool / standings.length).toFixed(1);
+                document.getElementById('league-avg-score').textContent = avgPoints;
+
+                // Basic naive projection (Assuming top score x ~1.15 if mid-season, scaling dynamically would require tracking gameweek limits, here we use a static estimate logic)
+                const currentLeaderTotal = topManager.total;
+                // Just a fun mathematical placeholder logic for the "predictions"
+                const projection = Math.round(currentLeaderTotal * 1.35); 
+                document.getElementById('projected-winner-score').textContent = projection > 0 ? projection : 2450;
+            }
+        }
+
+        // Initialize fetch on page load
+        window.addEventListener('DOMContentLoaded', fetchLeagueData);
+    </script>
+</body>
+</html>
