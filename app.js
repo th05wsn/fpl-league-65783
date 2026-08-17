@@ -1,8 +1,12 @@
 const LEAGUE_ID = '65783';
 const TARGET_URL = `https://fantasy.premierleague.com/api/leagues-classic/${LEAGUE_ID}/standings/`;
 const PROXIES = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(TARGET_URL)}`,
-    `https://corsproxy.io/?${encodeURIComponent(TARGET_URL)}`
+    // Proxy 1: CodeTabs (often works well for FPL)
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(TARGET_URL)}`,
+    // Proxy 2: ThingProxy
+    `https://thingproxy.freeboard.io/fetch/${TARGET_URL}`,
+    // Proxy 3: CORS Proxy IO (Original fallback)
+    `https://corsproxy.io/?url=${encodeURIComponent(TARGET_URL)}`
 ];
 
 let globalData = [];
