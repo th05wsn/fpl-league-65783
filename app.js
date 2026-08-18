@@ -3,7 +3,7 @@ const TARGET_URL = `https://fantasy.premierleague.com/api/leagues-classic/${LEAG
 const PROXIES = [
     // Proxy 1: CodeTabs (often works well for FPL)
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(TARGET_URL)}`,
-    // Proxy 2: ThingProxy
+    // Proxy 2: ThingProx
     `https://thingproxy.freeboard.io/fetch/${TARGET_URL}`,
     // Proxy 3: CORS Proxy IO (Original fallback)
     `https://corsproxy.io/?url=${encodeURIComponent(TARGET_URL)}`
