@@ -3,193 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPL League 65783 | Premium Dashboard</title>
-    
-    <!-- Tailwind CSS (via CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        fpl: { purple: '#37003c', green: '#00ff87', dark: '#240027' }
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Custom CSS -->
+    <title>League Dashboard | FPL</title>
+    <!-- Google Fonts for a modern, sporty look -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col">
-
-    <!-- Header -->
-    <header class="gradient-header text-white shadow-xl relative overflow-hidden">
-        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full border-4 border-white opacity-10"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between relative z-10 gap-4">
-            <div class="flex items-center space-x-5">
-                <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm border border-white/10">
-                    <i class="fa-solid fa-trophy text-3xl text-fpl-green"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" id="league-title">Loading League...</h1>
-                    <div class="flex items-center mt-1 space-x-3 text-sm font-medium opacity-90">
-                        <span class="bg-fpl-dark px-2 py-0.5 rounded text-fpl-green">ID: 65783</span>
-                        <span id="last-updated"><i class="fa-regular fa-clock mr-1"></i> Updating...</span>
-                    </div>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="brand">
+                <!-- A simple SVG to mimic a sports logo -->
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    <path d="M2 12h20"></path>
+                </svg>
+                <div class="header-titles">
+                    <span class="season-tag">2026/2027 SEASON</span>
+                    <h1 id="league-name">Loading Dashboard...</h1>
                 </div>
             </div>
-            <div class="flex space-x-3 w-full sm:w-auto">
-                <button onclick="fetchLeagueData()" class="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center">
-                    <i class="fa-solid fa-rotate-right mr-2" id="refresh-icon"></i> Refresh
-                </button>
-                <a href="https://fantasy.premierleague.com/" target="_blank" class="flex-1 sm:flex-none bg-fpl-green text-fpl-purple px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-[#00e57a] transition-all shadow-lg flex items-center justify-center">
-                    FPL Site <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i>
-                </a>
+            <div class="update-status">
+                <span class="pulse-dot"></span> Live Standings
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full -mt-6 relative z-20">
-        
-        <!-- Error State -->
-        <div id="error-state" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-5 mb-8 rounded-lg shadow-sm flex items-start">
-            <i class="fa-solid fa-triangle-exclamation text-xl mr-3 mt-0.5 text-red-500"></i>
-            <div>
-                <h3 class="font-bold text-red-800">Connection Issue</h3>
-                <p class="text-sm mt-1">Unable to connect to the FPL API. The server might be updating or the proxy is temporarily blocked. Try refreshing.</p>
-            </div>
-        </div>
+    <main class="dashboard">
+        <!-- Top 3 Podium -->
+        <section class="podium-section" id="podium-container" style="display: none;">
+            <!-- Injected via JS -->
+        </section>
 
-        <!-- Dashboard Grid -->
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            
-            <!-- Left Column: Standings -->
-            <div class="xl:col-span-2 flex flex-col space-y-4">
-                
-                <!-- Toolbar: Search & Stats -->
-                <div class="glass-card rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border border-gray-100">
-                    <div class="relative w-full sm:w-72">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-                        </div>
-                        <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-fpl-purple focus:border-fpl-purple sm:text-sm transition-all" placeholder="Search manager or team...">
-                    </div>
-                    <div class="flex space-x-2 text-sm">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg font-medium border border-gray-200">
-                            <i class="fa-solid fa-users mr-1"></i> <span id="player-count">0</span> Managers
-                        </span>
-                    </div>
+        <!-- Full League Table -->
+        <section class="table-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h2>League Standings</h2>
                 </div>
-
-                <!-- Table Container -->
-                <div class="glass-card rounded-xl border border-gray-100 overflow-hidden flex-grow flex flex-col">
-                    <div class="table-container overflow-x-auto overflow-y-auto max-h-[600px]">
-                        <table class="w-full text-left border-collapse relative">
-                            <thead class="bg-white sticky top-0 z-10 shadow-sm border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider">
-                                <tr>
-                                    <th class="px-5 py-4 font-bold sortable group" onclick="sortTable('rank')">
-                                        Rank <i class="fa-solid fa-sort ml-1 text-gray-300 group-hover:text-fpl-purple"></i>
-                                    </th>
-                                    <th class="px-5 py-4 font-bold">Team & Manager</th>
-                                    <th class="px-5 py-4 font-bold text-center sortable group" onclick="sortTable('event_total')">
-                                        GW Pts <i class="fa-solid fa-sort ml-1 text-gray-300 group-hover:text-fpl-purple"></i>
-                                    </th>
-                                    <th class="px-5 py-4 font-bold text-center sortable group" onclick="sortTable('total')">
-                                        Total <i class="fa-solid fa-sort ml-1 text-gray-300 group-hover:text-fpl-purple"></i>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="standings-body" class="divide-y divide-gray-100 text-sm bg-white">
-                                <!-- Skeleton rows for initial load -->
-                                <tr class="skeleton-row"><td class="p-4"><div class="skeleton h-6 w-12"></div></td><td class="p-4"><div class="skeleton h-5 w-32 mb-2"></div><div class="skeleton h-4 w-24"></div></td><td class="p-4"><div class="skeleton h-6 w-10 mx-auto"></div></td><td class="p-4"><div class="skeleton h-6 w-12 mx-auto"></div></td></tr>
-                                <tr class="skeleton-row"><td class="p-4"><div class="skeleton h-6 w-12"></div></td><td class="p-4"><div class="skeleton h-5 w-40 mb-2"></div><div class="skeleton h-4 w-20"></div></td><td class="p-4"><div class="skeleton h-6 w-10 mx-auto"></div></td><td class="p-4"><div class="skeleton h-6 w-12 mx-auto"></div></td></tr>
-                                <tr class="skeleton-row"><td class="p-4"><div class="skeleton h-6 w-12"></div></td><td class="p-4"><div class="skeleton h-5 w-28 mb-2"></div><div class="skeleton h-4 w-32"></div></td><td class="p-4"><div class="skeleton h-6 w-10 mx-auto"></div></td><td class="p-4"><div class="skeleton h-6 w-12 mx-auto"></div></td></tr>
-                            </tbody>
-                        </table>
-                        
-                        <!-- Empty State for Search -->
-                        <div id="no-results" class="hidden py-12 text-center text-gray-500">
-                            <i class="fa-regular fa-face-frown-open text-4xl mb-3 text-gray-300"></i>
-                            <p>No managers found matching your search.</p>
-                        </div>
-                    </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th class="team-col">Manager & Team</th>
+                                <th class="center-col">GW Pts</th>
+                                <th class="center-col">Total Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="league-table-body">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
-            <!-- Right Column: Stats & Predictions -->
-            <div class="space-y-6">
-                <!-- Top Manager Card -->
-                <div class="glass-card rounded-xl border border-gray-100 p-1 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-100 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 pointer-events-none"></div>
-                    <div class="bg-gradient-to-br from-white to-amber-50/30 p-6 rounded-lg relative z-10">
-                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-5 flex items-center">
-                            <i class="fa-solid fa-medal text-yellow-500 mr-2 text-base"></i> League Leader
-                        </h3>
-                        <div id="leader-skeleton">
-                            <div class="skeleton h-6 w-3/4 mb-2"></div>
-                            <div class="skeleton h-4 w-1/2"></div>
-                        </div>
-                        <div id="leader-content" class="hidden">
-                            <p id="top-manager-name" class="font-extrabold text-gray-900 text-xl truncate"></p>
-                            <p id="top-team-name" class="text-fpl-purple font-medium text-sm mt-1 truncate"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GW Performance Card -->
-                <div class="glass-card rounded-xl border border-gray-100 p-6">
-                    <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-5">Gameweek Insights</h3>
-                    <ul class="space-y-5">
-                        <li class="flex justify-between items-center group">
-                            <span class="text-sm text-gray-600 font-medium group-hover:text-gray-900 transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-red-50 text-red-500 inline-flex items-center justify-center mr-2">
-                                    <i class="fa-solid fa-fire"></i>
-                                </span> Highest Score
-                            </span>
-                            <span id="highest-gw-score" class="font-bold text-gray-900 bg-gray-50 border border-gray-100 px-3 py-1 rounded-md shadow-sm">--</span>
-                        </li>
-                        <li class="flex justify-between items-center group">
-                            <span class="text-sm text-gray-600 font-medium group-hover:text-gray-900 transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 inline-flex items-center justify-center mr-2">
-                                    <i class="fa-solid fa-chart-line"></i>
-                                </span> Average Score
-                            </span>
-                            <span id="league-avg-score" class="font-bold text-gray-900 bg-gray-50 border border-gray-100 px-3 py-1 rounded-md shadow-sm">--</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Projection Panel -->
-                <div class="glass-card rounded-xl border border-gray-100 p-6 bg-gradient-to-b from-white to-gray-50">
-                    <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-4">Projected Winner</h3>
-                    <p class="text-sm text-gray-500 mb-5 leading-relaxed">Estimated points required to win this mini-league based on current trajectories.</p>
-                    <div class="text-center bg-fpl-dark text-white rounded-xl p-6 shadow-inner border border-gray-800 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                        <div class="relative z-10 flex items-baseline justify-center">
-                            <span id="projected-winner-score" class="text-4xl font-black text-fpl-green tracking-tight">--</span>
-                            <span class="text-sm ml-2 text-gray-300 font-medium uppercase">pts</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        </section>
     </main>
 
-    <footer class="mt-auto border-t border-gray-200 bg-white/50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500">
-            <p>&copy; <script>document.write(new Date().getFullYear())</script> Dashboard for League 65783</p>
-            <p class="mt-2 sm:mt-0">Data from Fantasy Premier League API</p>
-        </div>
-    </footer>
-
-    <!-- Custom JavaScript -->
     <script src="app.js"></script>
 </body>
 </html>
