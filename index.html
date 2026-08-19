@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>League Dashboard | FPL</title>
-    <!-- Google Fonts for a modern, sporty look -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <!-- Chart.js for the line graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Link to your CSS file -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="header">
         <div class="header-content">
             <div class="brand">
-                <!-- A simple SVG to mimic a sports logo -->
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
@@ -24,15 +26,32 @@
                 </div>
             </div>
             <div class="update-status">
-                <span class="pulse-dot"></span> Live Standings
+                <span class="pulse-dot"></span> <span id="last-updated-text">Live Standings</span>
             </div>
         </div>
     </header>
 
     <main class="dashboard">
+        <!-- New: Global FPL Top Players Widget -->
+        <section class="top-players-widget" id="top-players-container" style="display: none;">
+            <!-- Injected via JS -->
+        </section>
+
         <!-- Top 3 Podium -->
         <section class="podium-section" id="podium-container" style="display: none;">
             <!-- Injected via JS -->
+        </section>
+
+        <!-- Points Race Chart -->
+        <section class="chart-section" style="margin-bottom: 2rem;">
+            <div class="table-card" style="padding: 1.5rem;">
+                <div class="table-header" style="border: none; padding: 0 0 1.5rem 0;">
+                    <h2>The Points Race</h2>
+                </div>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="pointsChart"></canvas>
+                </div>
+            </div>
         </section>
 
         <!-- Full League Table -->
@@ -47,8 +66,11 @@
                             <tr>
                                 <th>Pos</th>
                                 <th class="team-col">Manager & Team</th>
+                                <th class="center-col">Form (Last 3)</th>
                                 <th class="center-col">GW Pts</th>
                                 <th class="center-col">Total Pts</th>
+                                <th class="center-col">Gap</th>
+                                <th class="center-col">To 1st</th>
                             </tr>
                         </thead>
                         <tbody id="league-table-body">
@@ -59,7 +81,8 @@
             </div>
         </section>
     </main>
-
+    
+    <!-- Link to your JavaScript file -->
     <script src="app.js"></script>
 </body>
 </html>
