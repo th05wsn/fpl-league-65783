@@ -1,0 +1,36 @@
+name: Fetch Live FPL Data
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs automatically at the top of every hour
+  workflow_dispatch: # Allows you to click a button to run it manually
+
+permissions:
+  contents: write # Allows the bot to save the data.json file to your repo
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Fetch FPL Data
+        env:
+          LEAGUE_ID: ${{ secrets.LEAGUE_ID }}
+        run: python fetch_fpl.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automated FPL data update" && git push)
